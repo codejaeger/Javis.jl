@@ -1,5 +1,13 @@
 # Code examples and animations for project during GSoC 2021
 
+## Demos
+
+![](/examples/graph_animations/example1.gif) ![](/examples/graph_animations/example2.gif)
+
+1. Changing layout
+2. Rendered nodes and edges using manual ordering
+
+
 ## Updates
 - Created `GraphAnimation` the struct used for maintaining graph layout, Javis object information & animation order for the graph elements.
 - Started with a very basic rendering function for graph animation

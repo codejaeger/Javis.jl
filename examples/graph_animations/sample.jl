@@ -4,9 +4,51 @@ using GraphPlot
 using NetworkLayout:Buchheim
 using SparseArrays
 using MetaGraphs
+using Animations
 
-include("GraphAnimation.jl")
-include("utils.jl")
+mutable struct GraphAnimation
+    graph::AbstractGraph
+    ordering::Vector{Union{Int, Tuple{Int, Int}}}
+    animated_graph::MetaGraph
+    mode::Symbol
+    frames::Int
+end
+
+function GraphAnimation(graph::AbstractGraph, mode::Symbol)
+    animated_graph = MetaGraph(graph)
+    ordering = Vector{Union{Int, Tuple{Int, Int}}}()
+    if mode != :incremental
+        ordering = get_order(LightGraphs.bfs_tree(graph, 1))
+    end
+    return GraphAnimation(graph, ordering, animated_graph, mode, 0)
+end
+
+function setlayout(layout_x::Vector{Float64}, layout_y::Vector{Float64})
+    for i in 1:size(layout_x)[1]
+        set_prop!(CURRENT_GRAPH[1].animated_graph, i, :position, Point(layout_x[i], layout_y[i]))
+    end
+end
+
+function get_order(tree)
+    ordering = Vector{Union{Int, Tuple{Int, Int}}}()
+    function bfs(root)
+        push!(ordering, root)
+        for i in neighbors(tree, root)
+            bfs(i)
+            push!(ordering, (root, i))
+        end
+    end
+    bfs(1)
+    return ordering
+end
+
+function adjacency_list(edge_list::Any, nodes::Int)
+    adjacency_list = [Any[] for i in range(1; length=nodes)]
+    for i in edge_list
+        push!(adjacency_list[i[1]], i[2])
+    end
+    return adjacency_list
+end
 
 function animate_graph(graph::AbstractGraph, layout::Symbol, mode::Symbol)
     if size(CURRENT_GRAPH)[1] == 0 || CURRENT_GRAPH[1].graph != graph
@@ -100,3 +142,36 @@ function animate_edge(from_node::Int, to_node::Int)
     CURRENT_GRAPH[1].frames += 5
     return edge
 end
+
+function ground(args...)
+    background("white") # canvas background
+    sethue("black") # pen color
+end
+
+
+CURRENT_GRAPH = Array{GraphAnimation,1}()
+demo = Video(500, 500)
+Background(1:700, ground)
+g = SimpleDiGraph(6)
+add_edge!(g, 1, 2)
+add_edge!(g, 1, 3)
+add_edge!(g, 1, 4)
+add_edge!(g, 2, 5)
+add_edge!(g, 3, 5)
+add_edge!(g, 2, 6)
+add_edge!(g, 1, 6)
+animate_graph(g, :spring, :whole)
+animate_graph(g, :tree, :whole)
+render(demo; pathname="tutorial_1.gif")
+
+# adj_list = Vector{Int}[   # adjacency list
+#         [2,3,4],
+#         [5,6],
+#         [5],
+#         [6],
+#         [],
+#         []
+#       ]
+
+# animate_graph(g, :tree, :whole)
+# inside_circle = Object((args...) -> nodes(O, "black", :stroke, 140, "longdashed"))

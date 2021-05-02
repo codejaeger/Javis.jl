@@ -23,6 +23,7 @@ Object(91:100, (args...)->circ("red"))
 """
 struct RFrames
     frames::UnitRange
+    from_start::Bool
 end
 
 """
@@ -30,4 +31,5 @@ end
 
 Shorthand for RFrames(1:i)
 """
-RFrames(i::Int) = RFrames(1:i)
+RFrames(i::Int) = RFrames(1:i, false)
+RFrames(f::UnitRange) = RFrames(f, false)

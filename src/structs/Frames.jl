@@ -76,8 +76,13 @@ function get_frames(
     last_frames::UnitRange;
     is_first = false,
 )
-    start_frame = last(last_frames) + first(relative.frames)
-    last_frame = last(last_frames) + last(relative.frames)
+    if !relative.from_start
+        start_frame = last(last_frames) + first(relative.frames)
+        last_frame = last(last_frames) + last(relative.frames)
+    else
+        start_frame = first(last_frames) + first(relative.frames)
+        last_frame = first(last_frames) + last(relative.frames)
+    end
     return start_frame:last_frame
 end
 
