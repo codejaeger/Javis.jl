@@ -3,9 +3,8 @@
 
 Maintain information for the graph object to be drawn and animated on the canvas.
 
-    
 """
-struct GraphAnimation{T}
+struct GraphAnimation
     reference_graph
     width::Int
     height::Int
@@ -59,6 +58,12 @@ function _graph_animation_object(mode)
     # layout weights etc.
 end
 
+struct GraphNode
+    node_id
+    properties_to_style_map::Dict{Any, Symbol}
+    draw_fn::Function
+end
+
 # For nodes store drawing options as part of the Javis object itself
 GraphNode(node_id) = GraphNode(node_id, Dict{Symbol, Symbol}())
 
@@ -75,6 +80,13 @@ function GraphNode(node_id, draw::Function)
 end
 
 Object(1:1, GraphNode(2, Circle()))
+
+struct GraphEdge
+    from_node
+    to_node
+    properties_to_style_map::Dict{Any, Symbol}
+    draw_fn::Function
+end
 
 function GraphEdge()
 
