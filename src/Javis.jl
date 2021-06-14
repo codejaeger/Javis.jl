@@ -17,6 +17,8 @@ using ProgressMeter
 using Random
 using Statistics
 using VideoIO
+import LightGraphs
+import LightGraphs: add_vertex!, add_edge!
 
 const FRAMES_SYMBOL = [:same, :all]
 
@@ -57,6 +59,9 @@ include("structs/Object.jl")
 include("structs/Transitions.jl")
 include("structs/Action.jl")
 
+include("structs/GraphAnimation.jl")
+include("structs/GraphNode.jl")
+include("structs/GraphEdge.jl")
 
 """
     Line
@@ -421,6 +426,7 @@ end
 export render, latex
 export Video, Object, Background, Action, RFrames, GFrames
 export Line, Transformation
+export GraphAnimation, GraphNode, GraphEdge
 export val, pos, ang, scl, get_value, get_position, get_angle, get_scale
 export projection, morph_to
 export appear, disappear, rotate_around, follow_path, change
