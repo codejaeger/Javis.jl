@@ -24,7 +24,6 @@ struct GraphNode
     draw::Function
     animate_on::Symbol
     property_style_map::Dict{Any,Symbol}
-    opts::Dict{Symbol,Any}
 end
 
 """
