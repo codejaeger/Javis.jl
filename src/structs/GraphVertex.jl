@@ -1,25 +1,25 @@
 """
-    GraphNode
+    GraphVertex
 
 Store the drawing function and properties individual to the node.
 
 # Examples
 ```julia
-function draw(opts)
-    circle(opts['position'], opts['radius'], :stroke)
-    return opts['position']
+function draw(;position, radius)
+    circle(position, radius, :stroke)
+    return position
 end
 
 g = [Dict(:weight=>2, :neighbors=>[2])
      Dict(:weight=>4, :neighbors=>[1])]
-ga = GraphAnimation(g, true, 100, 100, O)
+ga = Object(1:100, Graph(g, true, 100, 100), O)
 
-node1 = Object(1:50, GraphNode(ga, 1, draw; animate_on=:scale, property_style_map=Dict(:weight=>:radius)))
-node2 = Object(50:100, GraphNode(ga, 2, draw; animate_on=:scale, property_style_map=Dict(:weight=>:radius)))
+node1 = Object(1:50, GraphVertex(ga, 1, draw; animate_on=:scale, property_style_map=Dict(:weight=>:radius)))
+node2 = Object(50:100, GraphVertex(ga, 2, draw; animate_on=:scale, property_style_map=Dict(:weight=>:radius)))
 render(video; pathname="graph_node.gif")
 ```
 """
-struct GraphNode
+struct GraphVertex
     node::Int
     draw::Function
     animate_on::Symbol
@@ -27,7 +27,7 @@ struct GraphNode
 end
 
 """
-    GraphNode(graph::AbstractObject, node::Int, draw::Function; <keyword arguments>, kwargs...)
+    GraphVertex(graph::AbstractObject, node::Int, draw::Function; <keyword arguments>)
 
 Create a graph node, specifying a drawing function or a property style map or both.
 
@@ -48,16 +48,13 @@ Create a graph node, specifying a drawing function or a property style map or bo
         - `:border_color`
         - `:radius`
 - `property_style_map::Dict{Any,Symbol}`: A mapping to of how node attributes map to node drawing styles.
-- `kwargs`: Additional drawing arguments used in the drawing function `draw`.
-    - These are translated to be stored in the the `opts` field in [`GraphNode`](@ref)
 """
-function GraphNode(
+function GraphVertex(
     graph::AbstractObject,
     node::Int,
     draw::Function;
     animate_on::Symbol = :opacity,
     property_style_map::Dict{Any,Symbol} = Dict(),
-    kwargs...,
 )
     # Register new node with Graph Animation metadata
     # IF mode is static simply call the draw function and return

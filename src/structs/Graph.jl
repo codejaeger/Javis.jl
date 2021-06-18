@@ -1,5 +1,5 @@
 """
-    GraphAnimation
+    Graph
 
 Maintain the graph state comprising of nodes, edges, layout, animation ordering etc.
 
@@ -10,7 +10,7 @@ This will be a part of the Javis [`Object`](@ref) metadata, when a new graph is 
     - Using a known graph type from the [LightGraphs.jl]() package leads to certain simplicity in usage.
 - `width::Int`: The width of the graph on the canvas.
 - `height::Int`: The height of the graph on the canvas.
-- `mode::Symbol`: The animaition of the graph can be done in two ways.
+- `mode::Symbol`: The animation of the graph can be done in two ways.
     - `static`: A lightweight animation which does not try to animate every detail during adding and deletion of nodes.
     - `dynamic`: The graph layout change is animated on addition of a new node. Can be computationally heavy depending on the size of graph.
 - `layout::Symbol`: The graph layout to be used. Can be one of :-
@@ -30,7 +30,7 @@ This will be a part of the Javis [`Object`](@ref) metadata, when a new graph is 
 - `edge_property_limits`: The minima and maxima calculated on the edge properties in the input graph.
     - Similar to `node_attribute_fn`.
 """
-struct GraphAnimation
+struct Graph
     graph
     width::Int
     height::Int
@@ -45,19 +45,18 @@ struct GraphAnimation
 end
 
 """
-    GraphAnimation(directed::Bool, width::Int, height::Int, [start_pos])
+    Graph(directed::Bool, width::Int, height::Int)
 
 Create an empty graph on the canvas with no nodes or edges yet.
 """
-GraphAnimation(
+Graph(
     directed::Bool,
     width::Int,
-    height::Int,
-    start_pos::Union{Point,Object} = O,
-) = GraphAnimation(nothing, directed, width, height, start_pos)
+    height::Int
+) = Graph(nothing, directed, width, height)
 
 """
-    GraphAnimation(graph, directed::Bool, width::Int, height::Int, start_pos::Union{Point,Object}; <keyword arguments>)
+    Graph(graph, directed::Bool, width::Int, height::Int; <keyword arguments>)
 
 Creates a Javis object for the graph and assigns its `Metadata` field to the object created by this struct.
 
@@ -66,7 +65,6 @@ Creates a Javis object for the graph and assigns its `Metadata` field to the obj
 - `directed::Bool`: `true` or `false`
 - `width::Int`: Size of the graph along the horizontal direction.
 - `height::Int`: Size of the graph along the vertical direction.
-- `start_pos::Union{Point,Object}`: Center of the graph relative to the canvas.
 
 # Keywords
 - `mode`: `:static` or `:dynamic`. Default is `:static`.
@@ -90,7 +88,7 @@ video = Video(300, 300)
 Background(1:100, ground)
 # A star graph
 graph = [[2, 3, 4, 5, 6], [], [], [], [], []]
-ga = GraphAnimation(graph, false, 100, 100, O)
+ga = Object(1:100, Graph(graph, false, 100, 100), O)
 render(video; pathname="graph_animation.gif")
 ```
 
@@ -98,12 +96,11 @@ render(video; pathname="graph_animation.gif")
 To be filled in ...
 
 """
-function GraphAnimation(
+function Graph(
     graph,
     directed::Bool,
     width::Int,
-    height::Int,
-    start_pos::Union{Point,Object} = O;
+    height::Int;
     mode::Symbol = :static,
     layout::Symbol = :spring,
     get_node_attribute::Function = (args...) -> nothing,
@@ -117,7 +114,7 @@ function GraphAnimation(
         @warn "Unknown layout '$(layout)'. Defaulting to static layout"
     end
 
-    graph_animation = GraphAnimation(
+    graph_animation = Graph(
         graph,
         width,
         height,
@@ -140,6 +137,8 @@ function GraphAnimation(
             _calculate_property_limits(args)
         end
     end
-    # Create Javis object
-
+    
+    # Assign the graph meta to current object and return the update function
+    CURRENT_OBJECT[1].meta = graph_animation
+    return (args...) -> update_fn(args)
 end

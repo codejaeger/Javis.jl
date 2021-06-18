@@ -3,9 +3,10 @@
 
 # Examples
 ```julia
-function draw(opts)
-    circle(opts['position'], opts['radius'] :stroke)
-    return opts['position']
+function draw(;position_1, position_2, line_width=5)
+    setline(line_width)
+    line(position_1, position_2, action=:stroke)
+    return O
 end
 function e(g, node1, node2, attr)
     return g[node1][node2]
@@ -30,12 +31,12 @@ struct GraphEdge
 end
 
 """
-    GraphEdge(graph::AbstractObject, from_node::Int, to_node::Int, draw::Function; <keyword arguments>, kwargs...)
+    GraphEdge(graph::AbstractObject, from_node::Int, to_node::Int, draw::Function; <keyword arguments>)
 
 Create a graph edge with additional drawing function and options.
 
 # Arguments
-- `graph::AbstractObject`: The graph created using [`GraphAnimation`](@ref) to which this node should be added to.
+- `graph::AbstractObject`: The graph created using [`Graph`](@ref) to which this edge should be added to.
 - `from_node::Int`
 - `to_node::Int`
 - `draw::Function`: The drawing function used to draw the edge.
@@ -51,8 +52,6 @@ Create a graph edge with additional drawing function and options.
         - `:color`
         - `:weights`: only possible for weighted graphs i.e. `SimpleWeightedGraphs`.
 - `properties_to_style_map::Dict{Any,Symbol}`: A mapping to of how edge attributes map to edge drawing styles.
-- `kwargs`: Additional drawing arguments used in the drawing function `draw`.
-    - These are translated to be stored in the the `opts` field in [`GraphEdge`](@ref)
 """
 function GraphEdge(
     graph::AbstractObject,
@@ -61,5 +60,4 @@ function GraphEdge(
     draw::Function;
     animate_on::Symbol = :opacity,
     property_style_map::Dict{Any,Symbol} = Dict(),
-    kwargs...,
 ) end
