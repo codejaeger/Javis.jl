@@ -17,8 +17,9 @@ using ProgressMeter
 using Random
 using Statistics
 using VideoIO
-import LightGraphs
-import LightGraphs: add_vertex!, add_edge!
+using LightGraphs
+import LightGraphs: weights, add_vertex!, rem_vertex!, add_edge!, rem_edge!
+using GraphPlot
 
 const FRAMES_SYMBOL = [:same, :all]
 
@@ -59,8 +60,9 @@ include("structs/Object.jl")
 include("structs/Transitions.jl")
 include("structs/Action.jl")
 
+include("structs/WeightedGraph.jl")
 include("structs/GraphAnimation.jl")
-include("structs/GraphNode.jl")
+include("structs/GraphVertex.jl")
 include("structs/GraphEdge.jl")
 
 """
@@ -106,6 +108,8 @@ include("action_animations.jl")
 include("javis_viewer.jl")
 include("latex.jl")
 include("object_values.jl")
+
+include("graph_animations.jl")
 
 """
     projection(p::Point, l::Line)
@@ -427,6 +431,25 @@ export render, latex
 export Video, Object, Background, Action, RFrames, GFrames
 export Line, Transformation
 export GraphAnimation, GraphNode, GraphEdge
+export WeightedGraph
+export @Object
+export is_directed,
+    edgetype,
+    ne,
+    nv,
+    vertices,
+    edges,
+    outneighbors,
+    inneighbors,
+    has_vertex,
+    has_edge,
+    add_vertex!,
+    rem_vertex!,
+    add_edge!,
+    rem_edge!,
+    weights,
+    node_props,
+    edge_props
 export val, pos, ang, scl, get_value, get_position, get_angle, get_scale
 export projection, morph_to
 export appear, disappear, rotate_around, follow_path, change

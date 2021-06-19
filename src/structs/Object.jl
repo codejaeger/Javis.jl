@@ -13,6 +13,7 @@ Defines what is drawn in a defined frame range.
 - `opts::Any` can hold any options defined by the user
 - `change_keywords::Dict{Symbol,Any}` the modified keywords changed by `change`
 - `result::Vector` the result of the object (if something gets returned)
+- `meta::Any` a field containing drawing information for this object
 """
 struct Object <: AbstractObject
     frames::Frames
@@ -23,6 +24,7 @@ struct Object <: AbstractObject
     opts::Dict{Symbol,Any}
     change_keywords::Dict{Symbol,Any}
     result::Vector
+    meta::Any
 end
 
 """
@@ -37,6 +39,9 @@ const CURRENT_OBJECT = Array{Object,1}()
 Object(func::Function, args...; kwargs...) = Object(:same, func, args...; kwargs...)
 
 Object(frames, func::Function; kwargs...) = Object(frames, func, O; kwargs...)
+
+Object(frames, func::Function, start_pos::Union{Object,Point}; kwargs...) =
+    Object(frames, func, nothing, start_pos; kwargs...)
 
 """
     Object([frames], func::Function, [start_pos]; kwargs...)
@@ -69,7 +74,13 @@ Here the [`Background`](@ref) uses the named way of defining the function wherea
 the circle object is defined in the anonymous function `(args...)->circle(O, 50, :fill)`.
 It basically depends whether you want to have a simple Luxor object or something more complex.
 """
-function Object(frames, func::Function, start_pos::Union{Object,Point}; kwargs...)
+function Object(
+    frames,
+    func::Function,
+    meta::Any,
+    start_pos::Union{Object,Point};
+    kwargs...,
+)
     if isempty(CURRENT_VIDEO)
         throw(ErrorException("A `Video` must be defined before an `Object`"))
     end
@@ -89,9 +100,25 @@ function Object(frames, func::Function, start_pos::Union{Object,Point}; kwargs..
         opts,
         Dict{Symbol,Any}(),
         Any[nothing],
+        meta,
     )
     push!(CURRENT_VIDEO[1].objects, object)
     return object
+end
+
+"""
+    @Object(frames, func, start_pos, kwargs...)
+
+Create an object from a custom shape with meta information.
+
+Useful only for predefined functions like [`Graph`](@ref), [`GraphNode`](@ref), etc..
+
+# Implementation
+Evaluates and expand the return 
+"""
+macro Object(frames, func, start_pos, kwargs...)
+    object_kwargs = [esc(i) for i in kwargs]
+    return :(Object($frames, $(func)..., $start_pos; $(object_kwargs...)))
 end
 
 """
