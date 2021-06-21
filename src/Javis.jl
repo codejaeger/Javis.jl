@@ -61,7 +61,7 @@ include("structs/Transitions.jl")
 include("structs/Action.jl")
 
 include("structs/WeightedGraph.jl")
-include("structs/GraphAnimation.jl")
+include("structs/JGraph.jl")
 include("structs/GraphVertex.jl")
 include("structs/GraphEdge.jl")
 
@@ -430,9 +430,9 @@ end
 export render, latex
 export Video, Object, Background, Action, RFrames, GFrames
 export Line, Transformation
-export GraphAnimation, GraphNode, GraphEdge
+export JGraph, GraphVertex, GraphEdge
 export WeightedGraph
-export @Object
+export @Object, @Graph
 export is_directed,
     edgetype,
     ne,

@@ -1,5 +1,5 @@
 """
-    GraphAnimation
+    JGraph
 
 Maintain the graph state comprising of nodes, edges, layout, animation ordering etc.
 
@@ -29,7 +29,7 @@ This will be a part of the Javis [`Object`](@ref) metadata, when a new graph is 
 - `edge_property_limits`: The minima and maxima calculated on the edge properties in the input graph.
     - Similar to `node_attribute_fn`.
 """
-struct GraphAnimation
+struct JGraph
     adjacency_list::WeightedGraph
     width::Int
     height::Int
@@ -42,17 +42,19 @@ struct GraphAnimation
     node_property_limits::Dict{Symbol,Tuple{Real,Real}}
 end
 
+CURRENT_GRAPH = Array{AbstractObject, 1}()
+
 """
-    GraphAnimation(directed::Bool, width::Int, height::Int)
+    JGraph(directed::Bool, width::Int, height::Int)
 
 Create an empty graph on the canvas.
 """
-GraphAnimation(directed::Bool, width::Int, height::Int) =
-    directed ? GraphAnimation(WeightedGraph(LightGraphs.SimpleDiGraph()), width, height) :
-    GraphAnimation(WeightedGraph(LightGraphs.SimpleGraph()), width, height)
+JGraph(directed::Bool, width::Int, height::Int) =
+    directed ? JGraph(WeightedGraph(LightGraphs.SimpleDiGraph()), width, height) :
+    JGraph(WeightedGraph(LightGraphs.SimpleGraph()), width, height)
 
 """
-    GraphAnimation(graph, width::Int, height::Int; <keyword arguments>)
+    JGraph(graph, width::Int, height::Int; <keyword arguments>)
 
 Creates a Javis object for the graph and assigns its `Metadata` field to the object created by this struct.
 
@@ -85,7 +87,7 @@ video = Video(300, 300)
 Background(1:100, ground)
 # A star graph
 graph = [[2, 3, 4, 5, 6], [], [], [], [], []]
-ga = @Object(1:100, GraphAnimation(false, 100, 100), O)
+ga = @Object(1:100, JGraph(false, 100, 100), O)
 render(video; pathname="graph_animation.gif")
 ```
 
@@ -93,7 +95,7 @@ render(video; pathname="graph_animation.gif")
 To be filled in ...
 
 """
-function GraphAnimation(
+function JGraph(
     graph,
     width::Int,
     height::Int;
@@ -108,7 +110,7 @@ function GraphAnimation(
         @warn "Unknown layout '$(layout)'. Defaulting to static layout"
     end
 
-    graph_animation = GraphAnimation(
+    graph_animation = JGraph(
         graph,
         width,
         height,
@@ -165,7 +167,8 @@ end
 
 function _global_layout(video, object, frames; kwargs...)
     g = object.meta
-    layout_x = layout_y = []
+    layout_x = []
+    layout_y = []
     if g.layout == :none
         return
     elseif g.layout == :spring
@@ -173,7 +176,7 @@ function _global_layout(video, object, frames; kwargs...)
         if nv(g.adjacency_list.graph) > 0
             layout_x, layout_y = spring_layout(g.adjacency_list.graph)
         end
-    else
+    elseif g.layout == :spectral
         # Check special property layout_weight is defined on edges and collect weights
         edge_ordering_positions = edge_props(g.adjacency_list.graph)
         weights = map(
@@ -191,6 +194,6 @@ function _global_layout(video, object, frames; kwargs...)
     # Now assign positions back to all nodes
     for (idx, p) in enumerate(node_props(g.adjacency_list))
         node = g.ordering[p]
-        node.start_pos = coords[idx]
+        node.change_keywords[:position] = coords[idx]
     end
 end

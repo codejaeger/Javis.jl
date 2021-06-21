@@ -3,14 +3,14 @@
 
 Utility graph type to store one extra property with nodes and edges.
 """
-mutable struct WeightedGraph{T<:Integer} <: AbstractGraph{T}
+mutable struct WeightedGraph{T<:Number} <: AbstractGraph{T}
     graph::AbstractGraph{T}
     node_w::Dict{T,Any}
-    edge_w::Dict{Tuple{T,T},Any}
+    edge_w::Dict{Pair{T,T},Any}
 end
 
 function WeightedGraph(graph::AbstractGraph{T}) where {T}
-    return WeightedGraph(graph, Dict{T,Any}(), Dict{Tuple{T,T},Any}())
+    return WeightedGraph(graph, Dict{T,Any}(), Dict{Pair{T,T},Any}())
 end
 
 for extend in [
@@ -85,6 +85,30 @@ function rem_edge!(wg::WeightedGraph{T}, from_node::T, to_node::T) where {T}
         delete!(wg.edge_w, (from_node, to_node))
     end
     return check
+end
+
+"""
+    get_prop(wg::WeightedGraph, node::Int)
+    get_prop(wg::WeightedGraph, from_node::Int, to_node::Int)
+"""
+function get_prop(wg::WeightedGraph, node::Int)
+    return get(wg.node_w, node, nothing)
+end
+
+function get_prop(wg::WeightedGraph, from_node::Int, to_node::Int)
+    return get(wg.edge_w, from_node=>to_node, nothing)
+end
+
+"""
+    set_prop!(wg::WeightedGraph, node::Int, prop)
+    set_prop!(wg::WeightedGraph, from_node::Int, to_node::Int, prop)
+"""
+function set_prop!(wg::WeightedGraph, node::Int, prop::Any)
+    wg.node_w[node] = prop
+end
+
+function set_prop!(wg::WeightedGraph, from_node::Int, to_node::Int, prop::Any)
+    wg.edge_w[from_node=>to_node] = prop
 end
 
 """

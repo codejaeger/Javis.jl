@@ -103,6 +103,12 @@ function Object(
         meta,
     )
     push!(CURRENT_VIDEO[1].objects, object)
+    if typeof(meta) <: JGraph
+        if length(CURRENT_GRAPH) == 0
+            push!(CURRENT_GRAPH, object)
+        end
+        CURRENT_GRAPH[1] = object
+    end
     return object
 end
 
@@ -111,14 +117,24 @@ end
 
 Create an object from a custom shape with meta information.
 
-Useful only for predefined functions like [`Graph`](@ref), [`GraphNode`](@ref), etc..
-
-# Implementation
-Evaluates and expand the return 
+Useful only for predefined functions like [`JGraph`](@ref), [`GraphNode`](@ref), etc..
 """
 macro Object(frames, func, start_pos, kwargs...)
     object_kwargs = [esc(i) for i in kwargs]
     return :(Object($frames, $(func)..., $start_pos; $(object_kwargs...)))
+end
+
+"""
+    @Graph(g, frames, node, start_pos, kwargs)
+    
+Add a graph node to a graph object and set it as current graph object.
+"""
+macro Graph(g, frames, node, start_pos, kwargs...)
+    object_kwargs = [esc(i) for i in kwargs]
+    return quote
+        CURRENT_GRAPH[1]=$(esc(g))
+        push!(CURRENT_GRAPH[1].meta.ordering, Object($frames, $(node)..., $start_pos; $(object_kwargs...)))[length(CURRENT_GRAPH[1].meta.ordering)]
+    end
 end
 
 """
