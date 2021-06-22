@@ -37,3 +37,30 @@ The demo serves to list the features that I am going to implement for graph anim
 ### Reference implementation till now
 
 The struct definitions of `GraphAnimation`, `GraphNode` & `GraphEdge` are provided in [Graphs.jl](../../src/structs/Graphs.jl)
+
+### Updates
+
+#### 22 June
+Completed:
+* ~~A way to create graphs using `Object(1:100, JGraph(...)`~~
+    * Solved temporarily using multiple dispatch on the object constructor and `@Object` macro that expands the tuple `(draw_func, metadata)` returned by `JGraph`. 
+* ~~How to provide layout options to users.~~
+    * Provide 2 layout options for now and keep a `none` mode so that user can specify his own layout.
+* ~~How to access reference to node/edge objects from the parent graph.~~
+    * Keep a lightweight adjacency list in the parent with nodes and edges having an attribute to store their position in the ordering list.
+
+Working on:
+* How to make a graph node customizable. Having predefined drawing functions like `drawNode(shape="circle", radius=12, text="node", text_align="top_left")` with lots of options does not seem extendible.
+    * Use a plugin mechanism to let the user write their own drawing functions for certain node properties while reuse other default options.
+* Add nodes to a graph object. The usual method of `Object(1:100, GraphNode(...))` has a problem of how to register a graph node object to a graph.
+    * Using a macro syntax `@Graph g 1:100 GraphNode(...)` to register a created node object with the parent graph.
+
+Approach(s) thought of (or used):
+* To provide custom drawing options, provide an interface like 
+```julia
+@Graph g 1:100 GraphNode(12, [draw_shape(:square, 12), draw_text(:inside, "123"), fill(:image, "./img.png"), custom_border()])
+```
+This requires custom functions to adhere to some rules and export some parameters to other functions. For example, if nodes are drawn as square return `text_bbx` to support the option `:inside` of `draw_text`. Similarly to have your own custom border you can use `border_bbx` from a drawing function to create a border around the node.
+
+Stuck on:
+* How to manage keywords arguments passed to different drawing functions. For example, an object passes all the change keyword arguments to the drawing function, but to support node drawing functions like `draw_shape(:square, 12)` or custom functions like `star(...)` which may return something similar to `args(...; length=12)` only specific keyword armguents need to be supplied.
