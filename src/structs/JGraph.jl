@@ -165,7 +165,10 @@ function _global_property_limits(video, object, frames; kwargs...)
     end
 end
 
-function _global_layout(video, object, frames; kwargs...)
+function _global_layout(video, object, frame; kwargs...)
+    if frame != 1
+        return
+    end
     g = object.meta
     layout_x = []
     layout_y = []
@@ -193,7 +196,6 @@ function _global_layout(video, object, frames; kwargs...)
     coords = coords .* [(g.width, g.height)]
     # Now assign positions back to all nodes
     for (idx, p) in enumerate(node_props(g.adjacency_list))
-        node = g.ordering[p]
-        node.change_keywords[:position] = coords[idx]
+        g.ordering[p].change_keywords[:position] = coords[idx]
     end
 end

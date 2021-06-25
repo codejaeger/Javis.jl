@@ -133,7 +133,7 @@ macro Graph(g, frames, node, start_pos, kwargs...)
     object_kwargs = [esc(i) for i in kwargs]
     return quote
         CURRENT_GRAPH[1]=$(esc(g))
-        push!(CURRENT_GRAPH[1].meta.ordering, Object($frames, $(node)..., $start_pos; $(object_kwargs...)))[length(CURRENT_GRAPH[1].meta.ordering)]
+        push!(CURRENT_GRAPH[1].meta.ordering, Object($frames, $(esc(node))..., $start_pos; $(object_kwargs...)))[length(CURRENT_GRAPH[1].meta.ordering)]
     end
 end
 
