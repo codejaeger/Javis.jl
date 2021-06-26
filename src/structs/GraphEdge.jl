@@ -25,9 +25,9 @@ render(video; pathname="graph_node.gif")
 struct GraphEdge
     from_node::Int
     to_node::Int
-    draw::Function
     animate_on::Symbol
     property_style_map::Dict{Any,Symbol}
+    opts::Dict{Symbol, Any}
 end
 
 """
@@ -53,11 +53,29 @@ Create a graph edge with additional drawing function and options.
         - `:weights`: only possible for weighted graphs i.e. `SimpleWeightedGraphs`.
 - `properties_to_style_map::Dict{Any,Symbol}`: A mapping to of how edge attributes map to edge drawing styles.
 """
+GraphEdge(from_node::Int, to_node::Int, draw::Union{Vector{Function}, Function}; kwargs...) =
+    GraphEdge(CURRENT_GRAPH[1], from_node, to_node, draw; kwargs...)
+
+GraphEdge(graph::AbstractObject, from_node::Int, to_node::Int, draw::Vector{Function}; kwargs...) =
+    GraphEdge(graph, from_node, to_node, compile_draw_funcs(draw); kwargs...)
+
 function GraphEdge(
     graph::AbstractObject,
     from_node::Int,
     to_node::Int,
     draw::Function;
     animate_on::Symbol = :opacity,
-    property_style_map::Dict{Any,Symbol} = Dict(),
-) end
+    property_style_map::Dict{Any,Symbol} = Dict{Any,Symbol}(),
+)
+    g = graph.meta
+    if !(typeof(g) <: JGraph)
+        throw(ErrorException("Cannot define edge since $(typeof(graph)) is not a `JGraph`"))
+    end
+    if get_prop(g.adjacency_list, from_node, to_node) !== nothing
+        @warn "Edge $(from_node)=>$(to_node) is already created on canvas. Recreating it will leave orphan edges in the animation. To undo, call `rem_edge!`"
+    end
+    add_edge!(g.adjacency_list.graph, from_node, to_node)
+    set_prop!(g.adjacency_list, from_node, to_node, length(g.ordering)+1)
+    graph_edge = GraphEdge(from_node, to_node, animate_on, property_style_map, Dict{Symbol, Any}())
+    return draw, graph_edge
+end

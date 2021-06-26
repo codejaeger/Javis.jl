@@ -25,6 +25,7 @@ struct GraphVertex
     node::Int
     animate_on::Symbol
     property_style_map::Dict{Any,Symbol}
+    opts::Dict{Symbol, Any}
 end
 
 """
@@ -56,7 +57,7 @@ GraphVertex(node::Int, draw::Union{Vector{Function}, Function}; kwargs...) =
     GraphVertex(CURRENT_GRAPH[1], node, draw; kwargs...)
 
 GraphVertex(graph::AbstractObject, node::Int, draw::Vector{Function}; kwargs...) =
-    GraphVertex(graph::AbstractObject, node::Int, compile_draw_funcs(draw); kwargs...)
+    GraphVertex(graph, node, compile_draw_funcs(draw); kwargs...)
 
 function GraphVertex(
     graph::AbstractObject,
@@ -71,7 +72,7 @@ function GraphVertex(
     end
     if g.mode == :static
         if get_prop(g.adjacency_list, node) !== nothing
-            @warn "Node $(node) is already created on canvas. Recreating it will leave orphan node objects in the animation. To undo, call `rem_edge!`"
+            @warn "Node $(node) is already created on canvas. Recreating it will leave orphan node objects in the animation. To undo, call `rem_node!`"
         end
         if g.layout != :none
             draw_fn = (args...; position=O, kwargs...) -> begin Luxor.translate(position); draw(args...; position=position, kwargs...) end
@@ -80,7 +81,7 @@ function GraphVertex(
         end
         add_vertex!(g.adjacency_list.graph)
         set_prop!(g.adjacency_list, nv(g.adjacency_list), length(g.ordering)+1)
-        graph_vertex = GraphVertex(node, animate_on, property_style_map)
+        graph_vertex = GraphVertex(node, animate_on, property_style_map, Dict{Symbol, Any}())
         return draw_fn, graph_vertex
     elseif g.mode == :dynamic
     end

@@ -371,7 +371,12 @@ function draw_object(object, video, frame, origin_matrix)
     cs = get_current_setting()
     !cs.show_object && return
 
-    res = object.func(video, object, frame; collect(object.change_keywords)...)
+    if object.meta !== nothing && :opts in fieldnames(typeof(object.meta))
+        res = object.func(video, object, frame; collect(object.change_keywords)..., collect(object.meta.opts)...)
+    else
+        res = object.func(video, object, frame; collect(object.change_keywords)...)
+    end
+
     current_global_matrix = cairotojuliamatrix(getmatrix())
     # obtain current matrix without the initial matrix part
     current_matrix = inv(origin_matrix) * current_global_matrix

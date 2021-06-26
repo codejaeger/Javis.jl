@@ -127,5 +127,5 @@ end
     edge_props(wg::WeightedGraph)
 """
 function edge_props(wg::WeightedGraph)
-    map((e) -> wg.edge_w[Tuple(e)], edges(wg))
+    map((e) -> wg.edge_w[Pair(e)], edges(wg))
 end

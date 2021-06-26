@@ -166,36 +166,43 @@ function _global_property_limits(video, object, frames; kwargs...)
 end
 
 function _global_layout(video, object, frame; kwargs...)
-    if frame != 1
-        return
-    end
     g = object.meta
-    layout_x = []
-    layout_y = []
-    if g.layout == :none
-        return
-    elseif g.layout == :spring
-        # Check due to some errors in calling spring_layout with an empty graph
-        if nv(g.adjacency_list.graph) > 0
-            layout_x, layout_y = spring_layout(g.adjacency_list.graph)
+    if frame == first(get_frames(object))
+        layout_x = []
+        layout_y = []
+        if g.layout == :none
+            return
+        elseif g.layout == :spring
+            # Check due to some errors in calling spring_layout with an empty graph
+            if nv(g.adjacency_list.graph) > 0
+                layout_x, layout_y = spring_layout(g.adjacency_list.graph)
+            end
+        elseif g.layout == :spectral
+            # Check special property layout_weight is defined on edges and collect weights
+            edge_ordering_positions = edge_props(g.adjacency_list.graph)
+            weights = map(
+                (idx) -> get(g.ordering[idx].change_keywords, :layout_weight, 1),
+                edge_ordering_positions,
+            )
+            if nv(g.adjacency_list.graph) > 0
+                layout_x, layout_y = spectral_layout(g.adjacency_list, weights)
+            end
         end
-    elseif g.layout == :spectral
-        # Check special property layout_weight is defined on edges and collect weights
-        edge_ordering_positions = edge_props(g.adjacency_list.graph)
-        weights = map(
-            (idx) -> get(g.ordering[idx].change_keywords, :layout_weight, 1),
-            edge_ordering_positions,
-        )
-        if nv(g.adjacency_list.graph) > 0
-            layout_x, layout_y = spectral_layout(g.adjacency_list, weights)
-        end
+        # Normalize coordinates between -0.5 and 0.5
+        coords = map((p) -> Point(p), collect(zip(layout_x, layout_y))) .- [(0.5, 0.5)]
+        # Scale to graph dimensions
+        coords = coords .* [(g.width, g.height)]
+        object.opts[:layout] = coords
     end
-    # Normalize coordinates between -0.5 and 0.5
-    coords = map((p) -> Point(p), collect(zip(layout_x, layout_y))) .- [(0.5, 0.5)]
-    # Scale to graph dimensions
-    coords = coords .* [(g.width, g.height)]
     # Now assign positions back to all nodes
     for (idx, p) in enumerate(node_props(g.adjacency_list))
-        g.ordering[p].change_keywords[:position] = coords[idx]
+        g.ordering[p].meta.opts[:position] = object.opts[:layout][idx]
+    end
+    # Define keyword arguments for edges defining endpoint position
+    for (_, p) in enumerate(edge_props(g.adjacency_list))
+        from_node = get_prop(g.adjacency_list, g.ordering[p].meta.from_node)
+        to_node = get_prop(g.adjacency_list, g.ordering[p].meta.to_node)
+        g.ordering[p].meta.opts[:p1] = g.ordering[from_node].meta.opts[:position]
+        g.ordering[p].meta.opts[:p2] = g.ordering[to_node].meta.opts[:position]
     end
 end
