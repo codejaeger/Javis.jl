@@ -64,3 +64,27 @@ This requires custom functions to adhere to some rules and export some parameter
 
 Stuck on:
 * How to manage keywords arguments passed to different drawing functions. For example, an object passes all the change keyword arguments to the drawing function, but to support node drawing functions like `draw_shape(:square, 12)` or custom functions like `star(...)` which may return something similar to `args(...; length=12)` only specific keyword armguents need to be supplied.
+
+#### 29 June
+Completed:
+* A demo to do a basic graph animation.
+* Add custom node shapes (square and circle), node borders (square and circular borders), node filling (color), node annotation (text within a box)
+```julia
+@Graph g 1:100 GraphNode(12, [draw_shape(:square, 12), draw_text(:inside, "123"), fill(:color, "red"), border("yellow")])
+```
+* The predefined functions above like `draw_shape`, `draw_text` etc. each return a function  having some keyword arguments to be used by this draw function.
+    * These options need to be provided by the user or exposed by some draw function like `draw_shape`--exposes-->`:text_box`--usedby-->`draw_text`.
+    * The issue was how to identify and compile this pool of keywords into a single draw function.
+
+Working on:
+* Extending the options available for node drawing configuration.
+* Edge drawing functions and line animation options.
+    * Need to handle self-loops and curves in graph.
+    * Animate a line generated from source to destination.
+
+Approach(s) thought of (or used):
+* Add a regular polygon option for node draw shape and add compatible support for it for borders and text box.
+
+Stuck on:
+* Aligning text on straight edges depending on the direction of edge.
+* Approximate area to draw self loop edges to prevent clutter.
