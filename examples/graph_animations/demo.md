@@ -1,5 +1,5 @@
 ```julia
-using Javis
+using Javis, LaTeXStrings
 
 function edge(; p1, p2, kwargs...)
     sethue("black")
@@ -27,12 +27,17 @@ adjacency_list = [[2, 3, 4, 5, 6],
                   [7, 8],
                   [],[],[],[],[]]
 for i in 1:length(adjacency_list)
-    @Graph g i*10:150 GraphVertex(i, (args...; kwargs...)->node()) O
+    if i%2 == 0
+        @Graph g i*10:150 GraphVertex(i, [node_shape(:circle, true, radius=12), node_fill(:image, "football.png"), node_text("$(i)", :top)]) O
+    else
+        @Graph g i*10:150 GraphVertex(i, [node_shape(:rectangle, true, width=20, height=20), node_fill(:color, "yellow"), node_text(L"""%$i""", :inside), node_border("green", 2)]) O
+    end
 end
-
+count = 0
 for i in 1:length(adjacency_list)
     for j in adjacency_list[i]
-        @Graph g 10+i*15:150 GraphEdge(i, j, (args...; kwargs...)->edge(; kwargs...)) O
+        @Graph g 15+count*10:150 GraphEdge(i, j, (args...; kwargs...)->edge(; kwargs...)) O
+        count+=1
     end
 end
 

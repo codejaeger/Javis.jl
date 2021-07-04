@@ -110,6 +110,8 @@ include("latex.jl")
 include("object_values.jl")
 
 include("graph_animations.jl")
+include("node_shapes.jl")
+include("edge_shapes.jl")
 
 """
     projection(p::Point, l::Line)
@@ -455,6 +457,7 @@ export is_directed,
     weights,
     node_props,
     edge_props
+export node_shape, node_text, node_fill, node_border
 export val, pos, ang, scl, get_value, get_position, get_angle, get_scale
 export projection, morph_to
 export appear, disappear, rotate_around, follow_path, change
