@@ -80,11 +80,7 @@ function GraphVertex(
         if get_prop(g.adjacency_list, node) !== nothing
             @warn "Node $(node) is already created on canvas. Recreating it will leave orphan node objects in the animation. To undo, call `rem_node!`"
         end
-        # if g.layout != :none
-        #     draw_fn = (args...; position=O, kwargs...) -> begin Luxor.translate(position); draw(args...; position=position, kwargs...) end
-        # else
         draw_fn = draw
-        # end
         add_vertex!(g.adjacency_list.graph)
         set_prop!(g.adjacency_list, nv(g.adjacency_list), length(g.ordering)+1)
         graph_vertex = GraphVertex(node, animate_on, property_style_map, opts)
@@ -99,7 +95,6 @@ end
 Aggregate all the draw functions into one.
 """
 function compile_draw_funcs(draw)
-    # Figure out how to map specific change keywords to each drawing functions
     draw_opts = Dict{Symbol, Any}()
     draw_fns = Vector{Function}()
     for d in draw

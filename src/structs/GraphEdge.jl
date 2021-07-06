@@ -53,17 +53,21 @@ Create a graph edge with additional drawing function and options.
         - `:weights`: only possible for weighted graphs i.e. `SimpleWeightedGraphs`.
 - `properties_to_style_map::Dict{Any,Symbol}`: A mapping to of how edge attributes map to edge drawing styles.
 """
-GraphEdge(from_node::Int, to_node::Int, draw::Union{Vector{Function}, Function}; kwargs...) =
+GraphEdge(from_node::Int, to_node::Int, draw; kwargs...) =
+    GraphEdge(CURRENT_GRAPH[1], from_node, to_node, compile_draw_funcs(draw)...; kwargs...)
+
+GraphEdge(from_node::Int, to_node::Int, draw::Function; kwargs...) =
     GraphEdge(CURRENT_GRAPH[1], from_node, to_node, draw; kwargs...)
 
-GraphEdge(graph::AbstractObject, from_node::Int, to_node::Int, draw::Vector{Function}; kwargs...) =
-    GraphEdge(graph, from_node, to_node, compile_draw_funcs(draw); kwargs...)
+GraphEdge(graph::AbstractObject, from_node::Int, to_node::Int, draw; kwargs...) =
+    GraphEdge(graph, from_node, to_node, compile_draw_funcs(draw)...; kwargs...)
 
 function GraphEdge(
     graph::AbstractObject,
     from_node::Int,
     to_node::Int,
-    draw::Function;
+    draw::Function,
+    opts::Dict{Symbol, Any} = Dict{Symbol, Any}(); # Make this a kw in the future
     animate_on::Symbol = :opacity,
     property_style_map::Dict{Any,Symbol} = Dict{Any,Symbol}(),
 )
@@ -76,6 +80,16 @@ function GraphEdge(
     end
     add_edge!(g.adjacency_list.graph, from_node, to_node)
     set_prop!(g.adjacency_list, from_node, to_node, length(g.ordering)+1)
-    graph_edge = GraphEdge(from_node, to_node, animate_on, property_style_map, Dict{Symbol, Any}())
+    if !is_directed(g.adjacency_list)
+        set_prop!(g.adjacency_list, to_node, from_node, length(g.ordering)+1)
+    end
+    if from_node == to_node
+        opts[:self_loop] = true
+    elseif is_directed(g.adjacency_list) && has_edge(g.adjacency_list, to_node, from_node)
+        opts[:loop] = true
+        other_edge = g.ordering[get_prop(g.adjacency_list, to_node, from_node)]
+        other_edge.meta.opts[:loop] = true
+    end
+    graph_edge = GraphEdge(from_node, to_node, animate_on, property_style_map, opts)
     return draw, graph_edge
 end
