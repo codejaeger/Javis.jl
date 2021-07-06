@@ -88,3 +88,20 @@ Approach(s) thought of (or used):
 Stuck on:
 * Aligning text on straight edges depending on the direction of edge.
 * Approximate area to draw self loop edges to prevent clutter.
+
+#### 6th July
+Completed:
+* Node drawing configurations and demo.
+    * Divided node property into shape, text, fill & border.
+* Animating line (curved lines) from a source to destination node
+
+Working on:
+* Edge drawing properties :- shape, style, label, arrowheads.
+    * Shape will provide a clip over the edge which maybe a curved or straight line. Shape also includes line width, end offsets and curvature.
+    * Styles incorporate features like color blends and dash type.
+    * Arrow deals with options to set arrows on the edge.
+    * Label/text allows positioning text boxes/latex relative to the edge
+
+Stuck on:
+* For both nodes and edges, the `node_shape` and `edge_shape` function was supposed to provide a clip around the edge and any custom function provided by the user would be clipped within that region. `:clip` action does not work as expected on a line.
+* How to return a edge outline for edges of different shapes? For example, for a line it an be 2 points for a circle it can be 3 points etc. This is required when positioning labels/glyphs with relative positioning on the edge.
