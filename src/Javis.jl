@@ -458,6 +458,7 @@ export is_directed,
     node_props,
     edge_props
 export node_shape, node_text, node_fill, node_border
+export edge_shape, edge_label, edge_style, edge_arrow
 export val, pos, ang, scl, get_value, get_position, get_angle, get_scale
 export projection, morph_to
 export appear, disappear, rotate_around, follow_path, change

@@ -30,7 +30,7 @@ This will be a part of the Javis [`Object`](@ref) metadata, when a new graph is 
     - Similar to `node_attribute_fn`.
 """
 struct JGraph
-    adjacency_list::WeightedGraph
+    adjacency_list
     width::Int
     height::Int
     mode::Symbol
@@ -52,6 +52,10 @@ Create an empty graph on the canvas.
 JGraph(directed::Bool, width::Int, height::Int) =
     directed ? JGraph(WeightedGraph(LightGraphs.SimpleDiGraph()), width, height) :
     JGraph(WeightedGraph(LightGraphs.SimpleGraph()), width, height)
+
+JGraph(directed::Bool, width::Int, height::Int, layout::Symbol=:none) =
+    directed ? JGraph(WeightedGraph(LightGraphs.SimpleDiGraph()), width, height; layout=layout) :
+    JGraph(WeightedGraph(LightGraphs.SimpleGraph()), width, height; layout=layout)
 
 """
     JGraph(graph, width::Int, height::Int; <keyword arguments>)
@@ -96,7 +100,7 @@ To be filled in ...
 
 """
 function JGraph(
-    graph,
+    graph::AbstractGraph,
     width::Int,
     height::Int;
     mode::Symbol = :static,
@@ -170,9 +174,7 @@ function _global_layout(video, object, frame; kwargs...)
     if frame == first(get_frames(object))
         layout_x = []
         layout_y = []
-        if g.layout == :none
-            return
-        elseif g.layout == :spring
+        if g.layout == :spring
             # Check due to some errors in calling spring_layout with an empty graph
             if nv(g.adjacency_list.graph) > 0
                 layout_x, layout_y = spring_layout(g.adjacency_list.graph)
@@ -188,15 +190,22 @@ function _global_layout(video, object, frame; kwargs...)
                 layout_x, layout_y = spectral_layout(g.adjacency_list, weights)
             end
         end
-        # Normalize coordinates between -0.5 and 0.5
-        coords = map((p) -> Point(p), collect(zip(layout_x, layout_y))) .- [(0.5, 0.5)]
-        # Scale to graph dimensions
-        coords = coords .* [(g.width, g.height)]
-        object.opts[:layout] = coords
+        if g.layout == :none
+            object.opts[:layout] = Vector{Point}()
+            for (idx, p) in enumerate(node_props(g.adjacency_list))
+                push!(object.opts[:layout], g.ordering[p].meta.opts[:position])
+            end
+        else
+            # Normalize coordinates between -0.5 and 0.5
+            coords = map((p) -> Point(p), collect(zip(layout_x, layout_y))) .- [(0.5, 0.5)]
+            # Scale to graph dimensions
+            coords = coords .* [(g.width, g.height)]
+            object.opts[:layout] = coords
+        end
     end
     # Now assign positions back to all nodes
     for (idx, p) in enumerate(node_props(g.adjacency_list))
-        g.ordering[p].meta.opts[:position] = object.opts[:layout][idx]
+        g.ordering[p].meta.opts[:position] = object.opts[:layout][idx] + object.start_pos
     end
     # Define keyword arguments for edges defining endpoint position
     for (_, p) in enumerate(edge_props(g.adjacency_list))
