@@ -30,7 +30,7 @@ This will be a part of the Javis [`Object`](@ref) metadata, when a new graph is 
     - Similar to `node_attribute_fn`.
 """
 struct JGraph
-    adjacency_list
+    adjacency_list::AbstractGraph
     width::Int
     height::Int
     mode::Symbol
@@ -213,5 +213,7 @@ function _global_layout(video, object, frame; kwargs...)
         to_node = get_prop(g.adjacency_list, g.ordering[p].meta.to_node)
         g.ordering[p].meta.opts[:p1] = g.ordering[from_node].meta.opts[:position]
         g.ordering[p].meta.opts[:p2] = g.ordering[to_node].meta.opts[:position]
+        g.ordering[p].meta.opts[:from_node_bbx] = get(g.ordering[from_node].meta.opts, :bounding_box, (O, O))
+        g.ordering[p].meta.opts[:to_node_bbx] = get(g.ordering[to_node].meta.opts, :bounding_box, (O, O))
     end
 end

@@ -52,9 +52,9 @@ Label a node with text or latex.
     - This position is determined with respect to the node `bounding_box` returned as a drawing option by [`node_shape`](@ref).
     - Can take the values `:inside`, `:top`, `:bottom`, `:left`, `:right`. Default is `:inside`.
 - `color`: The color of the text. Default is "black".
-- `offset`: Used only when `align` is not `:inside`. Specifies an offset in the direction of `align`.
+- `shift`: Used only when `align` is not `:inside`. Specifies an offset in the direction of `align`.
 """
-function node_text(text::AbstractString, align::Symbol, color="black", offset::Real=1)
+function node_text(text::AbstractString, align::Symbol, color="black", shift::Real=1)
     opts = Dict{Symbol, Any}()
     opts[:text_align] = align
     draw = (video, object, frame; text=text, bounding_box=(O, O), text_box=(O, O), text_align=:inside, text_color=color, clip=false, kwargs...) -> begin
@@ -75,13 +75,13 @@ function node_text(text::AbstractString, align::Symbol, color="black", offset::R
             scale(1/scl[1], 1/scl[2])
         end
         # Update for next frame
-        shift = _node_text_shift(text_align, text_dims, offset)
+        shift = _node_text_shift(text_align, text_dims, shift)
         object.meta.opts[:text_box] = bounding_box .+ shift
     end
     return opts, draw
 end
 
-function node_text(text::LaTeXString, align::Symbol, color="black", offset::Real=1)
+function node_text(text::LaTeXString, align::Symbol, color="black", shift::Real=1)
     opts = Dict{Symbol, Any}()
     opts[:text_align] = align
     draw = (video, object, frame; text=text, bounding_box=(O, O), text_box=(O, O), text_align=:inside, text_color=color, clip=false, kwargs...) -> begin
@@ -103,58 +103,59 @@ function node_text(text::LaTeXString, align::Symbol, color="black", offset::Real
             scale(1/scl[1], 1/scl[2])
         end
         # Update for next frame
-        shift = _node_text_shift(text_align, text_dims, offset)
+        shift = _node_text_shift(text_align, text_dims, shift)
         object.meta.opts[:text_box] = bounding_box .+ shift
     end
     return opts, draw
 end
 
-function _node_text_shift(text_align, text_dims, offset)
-    shift = (O, O)
+function _node_text_shift(text_align, text_dims, shift)
+    _shift = (O, O)
     if text_align == :top
-        shift = ((0, -text_dims[2]-offset), (0, -text_dims[2]-offset))
+        _shift = ((0, -text_dims[2]-shift), (0, -text_dims[2]-shift))
     elseif text_align == :bottom
-        shift = ((0, text_dims[2]+offset), (0, text_dims[2]+offset))
+        _shift = ((0, text_dims[2]+shift), (0, text_dims[2]+shift))
     elseif text_align == :left
-        shift = ((-text_dims[1]-offset, 0), (-text_dims[1]-offset, 0))
+        _shift = ((-text_dims[1]-shift, 0), (-text_dims[1]-shift, 0))
     elseif text_align == :right
-        shift = ((text_dims[1]+offset, 0), (text_dims[1]+offset, 0))
+        _shift = ((text_dims[1]+shift, 0), (text_dims[1]+shift, 0))
     end
     return shift
 end
+
+
+"""
+    text(text::LaTeXString)
+    
+Override to allow drawing Latex text.
+"""
+text(text::LaTeXString, args...; kwargs...) = latex(text, args...; kwargs...)
 
 """
     node_text(text::AbstractString, offset::Point, color)
     node_text(text::LaTeXString, offset::Point, color)
 
-Label a node with text, which is also rotated to match the direction specified by `offset`.
+Label a node with text (or latex), which is also rotated to match the direction specified by `offset`.
 
 # Arguments
 - `offset::Point`: Specify the offset of the text label with respect to the node center.
     - The text is translated and rotated in the direction of the offset.
 - `color`: The color of the text. Default is "black".
+- `shift::Real`: Indicates the shift w.r.t the offset direction.
+    - Eg. If the offset direction is in the upper or lower left quadrant calculated shift is (`shift`, 0).
+    - Default shift is 1.
 """
-function node_text(text::AbstractString, offset::Point, color="black")
+function node_text(text, offset::Point, color="black"; shift::Real=1)
     return (args... ; text=text, position=O, text_color=color, clip=false, kwargs...) -> begin
         clip ? clipreset() : nothing
         sethue(text_color)
-        translate(position+offset)
-        rotate(slope(O, offset)+pi/2)
-        Luxor.text(text, valign=:middle, halign=:center)
-        rotate(-slope(O, offset)-pi/2)
-        translate(-position-offset)
-    end
-end
-
-function node_text(text::LaTeXString, offset::Point, color::String="black")
-    return (args...; text=text, position=O, text_color=color, clip=false, kwargs...) -> begin
-        clip ? clipreset() : nothing
-        sethue(text_color)
-        translate(position+offset)
-        rotate(slope(O, offset)+pi/2)
-        latex(text, O, :middle, :center)
-        rotate(-slope(O, offset)-pi/2)
-        translate(-position-offset)
+        if frame > first(get_frames(object))+1
+            shift_x = slope(O, Point(O, offset)) ∉ [pi/2, 3*pi/2] ? sign(cos(slope(O, offset))) : 0
+            shift_y = slope(O, Point(O, offset)) ∈ [pi/2, 3*pi/2] ? sign(sin(slope(O, offset))) : 0
+            translate(position + offset + Point(shift_x, shift_y) * shift)
+            text(text, valign=:middle, halign=:center)
+            translate(-position - offset - Point(shift_x, shift_y) * shift)
+        end
     end
 end
 

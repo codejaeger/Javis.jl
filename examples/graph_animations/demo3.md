@@ -19,12 +19,12 @@ end
 video = Video(400, 400)
 Background(1:150, ground)
 
-g = @Object 1:150 JGraph(true, 100, 100, :none) Point(60, 60)
+g = @Object 1:150 JGraph(true, 100, 100, :spring) Point(60, 60)
 
-adjacency_list = [[2, 3, 4, 5, 6],
+adjacency_list = [[1, 2, 3, 4, 5, 6],
                   [7, 8],
                   [7, 8],
-                  [],[],[],[],[]]
+                  [],[5],[],[7],[8]]
 coords = []
 for i in 1:length(adjacency_list)
     if i%2 == 0
@@ -33,9 +33,10 @@ for i in 1:length(adjacency_list)
         @Graph g i*10:150 GraphVertex(i, [node(Point((9-i)*10, (i+5)*(i+5))), node_shape(:rectangle, true, width=20, height=20), node_fill(:color, "yellow"), node_text(L"""%$i""", :inside), node_border("green", 2)]) O
     end
 end
+count = 0
 for i in 1:length(adjacency_list)
     for j in adjacency_list[i]
-        @Graph g (i+j)*10:150 GraphEdge(i, j, [edge_shape(:curved, false; center_offset=7)]) O
+        @Graph g 15+count*10:150 GraphEdge(i, j, [edge_shape(:line, false, center_offset=13, end_offsets=(2, 2))]) O
         count+=1
     end
 end

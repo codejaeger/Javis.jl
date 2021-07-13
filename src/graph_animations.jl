@@ -1,4 +1,4 @@
-# Extend the graph utility functions to support Javis objects having metadata of type `Graph`
+# Extend the graph utility functions to support Javis objects having metadata of type `JGraph`
 for extend in [
     :is_directed,
     :edgetype,
@@ -15,7 +15,7 @@ for extend in [
         quote
             local func = $extend
             LightGraphs.$extend(o::AbstractObject, args...) =
-                typeof(o.meta) <: GraphAnimation ? $extend(o.meta.adjacency_list, args...) :
+                typeof(o.meta) <: JGraph ? $extend(o.meta.adjacency_list, args...) :
                 throw(
                     "Cannot call $(func) on a object with meta of type $(typeof(o.meta))",
                 )
