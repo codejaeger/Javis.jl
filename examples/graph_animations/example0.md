@@ -105,3 +105,19 @@ Working on:
 Stuck on:
 * For both nodes and edges, the `node_shape` and `edge_shape` function was supposed to provide a clip around the edge and any custom function provided by the user would be clipped within that region. `:clip` action does not work as expected on a line.
 * How to return a edge outline for edges of different shapes? For example, for a line it an be 2 points for a circle it can be 3 points etc. This is required when positioning labels/glyphs with relative positioning on the edge.
+
+#### 13th July
+Completed:
+* Add self-loops to graph
+
+Plans for this week:
+* complete implementation for `edge_label`, `edge_arrow`, `edge_style`
+* complete `dynamic` mode for graph creation
+* complete graph animation utlities highlight, change property, update graph, animate*
+* Update documentation for prevailing code
+* Add unit tests for node and edge drawing functions
+* Update examples-(1, 2, 3) with working code
+
+Stuck on (Backlog for now):
+* Self-loop egde orientation
+* Edge flickering when using `Luxor.text`
