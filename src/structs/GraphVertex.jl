@@ -24,22 +24,22 @@ render(video; pathname="graph_node.gif")
 ```
 """
 struct GraphVertex
-    node::Int
+    node::Integer
     animate_on::Symbol
     property_style_map::Dict{Any,Symbol}
     opts::Dict{Symbol, Any}
 end
 
 """
-    GraphVertex(node::Int, draw::Function; <keyword arguments>)
-    GraphVertex(graph::AbstractObject, node::Int, draw::Function; <keyword arguments>)
-    GraphVertex(graph::AbstractObject, node::Int, draw::Vector{Function}; <keyword arguments>)
+    GraphVertex(node::Integer, draw::Function; <keyword arguments>)
+    GraphVertex(graph::AbstractObject, node::Integer, draw::Function; <keyword arguments>)
+    GraphVertex(graph::AbstractObject, node::Integer, draw::Vector{Function}; <keyword arguments>)
 
 Create a graph node, specifying a drawing function or a property style map or both.
 
 # Arguments
 - `graph::AbstractObject`: The graph created using [`GraphAnimation`](@ref) to which this node should be added to.
-- `node::Int`: A unique id representing the node being added to the graph.
+- `node::Integer`: A unique id representing the node being added to the graph.
     - Currently, only numeric node ids are supported.
 - `draw::Function`: The drawing function used to draw the node.
     - Implementing the drawing function in a special way to expose the drawing parameters helps in better animation.
@@ -55,18 +55,18 @@ Create a graph node, specifying a drawing function or a property style map or bo
         - `:radius`
 - `property_style_map::Dict{Any,Symbol}`: A mapping to of how node attributes map to node drawing styles.
 """
-GraphVertex(node::Int, draw; kwargs...) =
+GraphVertex(node::Integer, draw; kwargs...) =
     GraphVertex(CURRENT_GRAPH[1], node, compile_draw_funcs(draw)...; kwargs...)
 
-GraphVertex(node::Int, draw::Function; kwargs...) =
+GraphVertex(node::Integer, draw::Function; kwargs...) =
     GraphVertex(CURRENT_GRAPH[1], node, draw; kwargs...)
 
-GraphVertex(graph::AbstractObject, node::Int, draw; kwargs...) =
+GraphVertex(graph::AbstractObject, node::Integer, draw; kwargs...) =
     GraphVertex(graph, node, compile_draw_funcs(draw)...; kwargs...)
 
 function GraphVertex(
     graph::AbstractObject,
-    node::Int,
+    node::Integer,
     draw::Function,
     opts::Dict{Symbol, Any} = Dict{Symbol, Any}(); # Make this a kw in the future
     animate_on::Symbol = :opacity,

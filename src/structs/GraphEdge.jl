@@ -23,8 +23,8 @@ render(video; pathname="graph_node.gif")
 ```
 """
 struct GraphEdge
-    from_node::Int
-    to_node::Int
+    from_node::AbstractObject
+    to_node::AbstractObject
     animate_on::Symbol
     property_style_map::Dict{Any,Symbol}
     opts::Dict{Symbol, Any}
@@ -53,19 +53,19 @@ Create a graph edge with additional drawing function and options.
         - `:weights`: only possible for weighted graphs i.e. `SimpleWeightedGraphs`.
 - `properties_to_style_map::Dict{Any,Symbol}`: A mapping to of how edge attributes map to edge drawing styles.
 """
-GraphEdge(from_node::Int, to_node::Int, draw; kwargs...) =
+GraphEdge(from_node::Integer, to_node::Integer, draw; kwargs...) =
     GraphEdge(CURRENT_GRAPH[1], from_node, to_node, compile_draw_funcs(draw)...; kwargs...)
 
-GraphEdge(from_node::Int, to_node::Int, draw::Function; kwargs...) =
+GraphEdge(from_node::Integer, to_node::Integer, draw::Function; kwargs...) =
     GraphEdge(CURRENT_GRAPH[1], from_node, to_node, draw; kwargs...)
 
-GraphEdge(graph::AbstractObject, from_node::Int, to_node::Int, draw; kwargs...) =
+GraphEdge(graph::AbstractObject, from_node::Integer, to_node::Integer, draw; kwargs...) =
     GraphEdge(graph, from_node, to_node, compile_draw_funcs(draw)...; kwargs...)
 
 function GraphEdge(
     graph::AbstractObject,
-    from_node::Int,
-    to_node::Int,
+    from_node::Integer,
+    to_node::Integer,
     draw::Function,
     opts::Dict{Symbol, Any} = Dict{Symbol, Any}(); # Make this a kw in the future
     animate_on::Symbol = :opacity,
@@ -90,6 +90,8 @@ function GraphEdge(
         other_edge = g.ordering[get_prop(g.adjacency_list, to_node, from_node)]
         other_edge.meta.opts[:loop] = true
     end
-    graph_edge = GraphEdge(from_node, to_node, animate_on, property_style_map, opts)
+    from_node_object = g.ordering[get_prop(g.adjacency_list, from_node)]
+    to_node_object = g.ordering[get_prop(g.adjacency_list, to_node)]
+    graph_edge = GraphEdge(from_node_object, to_node_object, animate_on, property_style_map, opts)
     return draw, graph_edge
 end

@@ -209,8 +209,8 @@ function _global_layout(video, object, frame; kwargs...)
     end
     # Define keyword arguments for edges defining endpoint position
     for (_, p) in enumerate(edge_props(g.adjacency_list))
-        from_node = get_prop(g.adjacency_list, g.ordering[p].meta.from_node)
-        to_node = get_prop(g.adjacency_list, g.ordering[p].meta.to_node)
+        from_node = get_prop(g.adjacency_list, g.ordering[p].meta.from_node.meta.node)
+        to_node = get_prop(g.adjacency_list, g.ordering[p].meta.to_node.meta.node)
         g.ordering[p].meta.opts[:p1] = g.ordering[from_node].meta.opts[:position]
         g.ordering[p].meta.opts[:p2] = g.ordering[to_node].meta.opts[:position]
         g.ordering[p].meta.opts[:from_node_bbx] = get(g.ordering[from_node].meta.opts, :bounding_box, (O, O))

@@ -24,7 +24,7 @@ g = @Object 1:150 JGraph(true, 100, 100, :spring) Point(60, 60)
 adjacency_list = [[1, 2, 3, 4, 5, 6],
                   [7, 8],
                   [7, 8],
-                  [],[5],[],[7],[8]]
+                  [],[],[],[],[]]
 coords = []
 for i in 1:length(adjacency_list)
     if i%2 == 0
@@ -36,7 +36,7 @@ end
 count = 0
 for i in 1:length(adjacency_list)
     for j in adjacency_list[i]
-        @Graph g 15+count*10:150 GraphEdge(i, j, [edge_shape(:line, false, center_offset=13, end_offsets=(2, 2))]) O
+        @Graph g 15+count*10:150 GraphEdge(i, j, [edge_shape(:line, center_offset=16, end_offsets=(2, 2)), edge_style(color="blue", linewidth=2), edge_arrow()]) O
         count+=1
     end
 end
