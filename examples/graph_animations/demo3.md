@@ -36,7 +36,7 @@ end
 count = 0
 for i in 1:length(adjacency_list)
     for j in adjacency_list[i]
-        @Graph g 15+count*10:150 GraphEdge(i, j, [edge_shape(:line, center_offset=16, end_offsets=(2, 2)), edge_style(color="blue", linewidth=2), edge_arrow()]) O
+        @Graph g 15+count*10:150 GraphEdge(i, j, [edge_shape(:line, center_offset=16, end_offsets=(2, 2)), edge_style(color="blue", linewidth=2), edge_arrow(), edge_label("$(i)->$(j)")]) O
         count+=1
     end
 end

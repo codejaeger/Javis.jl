@@ -46,7 +46,7 @@ function edge_style(; color="red", linewidth::Real=2, dash::String="solid", blen
 end
 
 function edge_arrow(; start=nothing, finish=nothing, color="black")
-    draw = (video, object, frame; outline=[O, O], start=start, finish=finish, len=len, angle=angle, color=color, linewidth=1, kwargs...) ->  begin
+    draw = (video, object, frame; outline=[O, O], start=start, finish=finish, color=color, kwargs...) ->  begin
         sethue(color)
         # Skip the default case
         if frame <= first(get_frames(object))+2 || outline == [O, O]
@@ -63,12 +63,33 @@ function edge_arrow(; start=nothing, finish=nothing, color="black")
             Luxor.arrow(outline[l-1:l]...)
         end
     end
-    return Dict{Symbol,Any}(), draw
+    return draw
 end
 
-function edge_label()
+function edge_label(text = ""; position::Real = 0.5, offset::Real = 2)
+    draw = (video, object, frame; outline=[O, O], position=position, offset=offset, kwargs...) ->  begin
+        #TODO What to do for bezier curved edges?
+        # Align text along edge
+        if frame <= first(get_frames(object))+2 || outline == [O, O]
+            return
+        end
+        l = length(outline)
+        idx = floor(Int, l * position)
+        if l%2 == 0
+            pt = (outline[idx] + outline[idx+1])/2
+            sl = slope(outline[idx], outline[idx+1])
+        else
+            pt = outline[idx]
+            sl = idx == l ? slope(outline[idx%l+1], outline[idx]) : slope(outline[idx], outline[idx+1])
+        end
+        translate(pt)
+        rotate(sl)
+        label(text, :N, O, leader=false, offset=offset)
+        sl == 0 ? rotate(1/sl) : nothing
+        translate(-pt)
+    end
+    return draw
 end
-
 
 function draw_self_loop_edge(p1, from_node_bbx, center_offset, end_offsets, direction)
     r = max((from_node_bbx[2]-from_node_bbx[1])/2..., center_offset)
