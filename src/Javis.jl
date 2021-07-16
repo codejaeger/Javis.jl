@@ -17,6 +17,9 @@ using ProgressMeter
 using Random
 using Statistics
 using VideoIO
+using LightGraphs
+import LightGraphs: weights, add_vertex!, rem_vertex!, add_edge!, rem_edge!
+using GraphPlot
 
 const FRAMES_SYMBOL = [:same, :all]
 
@@ -57,6 +60,10 @@ include("structs/Object.jl")
 include("structs/Transitions.jl")
 include("structs/Action.jl")
 
+include("structs/WeightedGraph.jl")
+include("structs/JGraph.jl")
+include("structs/GraphVertex.jl")
+include("structs/GraphEdge.jl")
 
 """
     Line
@@ -101,6 +108,10 @@ include("action_animations.jl")
 include("javis_viewer.jl")
 include("latex.jl")
 include("object_values.jl")
+
+include("graph_animations.jl")
+include("node_shapes.jl")
+include("edge_shapes.jl")
 
 """
     projection(p::Point, l::Line)
@@ -362,7 +373,12 @@ function draw_object(object, video, frame, origin_matrix)
     cs = get_current_setting()
     !cs.show_object && return
 
-    res = object.func(video, object, frame; collect(object.change_keywords)...)
+    if object.meta !== nothing && :opts in fieldnames(typeof(object.meta))
+        res = object.func(video, object, frame; collect(object.change_keywords)..., collect(object.meta.opts)...)
+    else
+        res = object.func(video, object, frame; collect(object.change_keywords)...)
+    end
+
     current_global_matrix = cairotojuliamatrix(getmatrix())
     # obtain current matrix without the initial matrix part
     current_matrix = inv(origin_matrix) * current_global_matrix
@@ -421,6 +437,29 @@ end
 export render, latex
 export Video, Object, Background, Action, RFrames, GFrames
 export Line, Transformation
+export JGraph, GraphVertex, GraphEdge
+export WeightedGraph
+export @Object, @Graph
+export is_directed,
+    edgetype,
+    ne,
+    nv,
+    vertices,
+    edges,
+    neighbors,
+    outneighbors,
+    inneighbors,
+    has_vertex,
+    has_edge,
+    add_vertex!,
+    rem_vertex!,
+    add_edge!,
+    rem_edge!,
+    weights,
+    node_props,
+    edge_props
+export node_shape, node_text, node_fill, node_border
+export edge_shape, edge_label, edge_style, edge_arrow
 export val, pos, ang, scl, get_value, get_position, get_angle, get_scale
 export projection, morph_to
 export appear, disappear, rotate_around, follow_path, change

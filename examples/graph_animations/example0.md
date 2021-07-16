@@ -24,6 +24,7 @@ The demo serves to list the features that I am going to implement for graph anim
 
 ### Examples
 
+0. [Demo](demo.jl)
 1. [Graph Traversal](example1.md)
 2. [Depth First Search](example2.md)
 2. [Shortest Path](example3.md)
